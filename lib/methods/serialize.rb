@@ -63,29 +63,6 @@ module EasyRoles
       # countless SerializationTypeMismatch errors trying to accomplish this, in vain. The real problem, of course,
       # is even trying to query serialized data. I'm unsure how well this would work in different ruby versions or
       # implementations, which may handle object dumping differently. Bitmasking seems to be a more reliable strategy.
-
-      base.class_eval do
-        const_set :ROLES_MARKER, '!'
-        scope :with_role, proc { |r|
-          query = "#{self.table_name}.#{column_name} LIKE " + ['"%',base::ROLES_MARKER,r,base::ROLES_MARKER,'%"'].join
-          where(query)
-        }
-
-        define_method :add_role_markers do
-          self[column_name.to_sym].map! { |r| [base::ROLES_MARKER,r,base::ROLES_MARKER].join }
-        end
-      
-        define_method :strip_role_markers do
-          self[column_name.to_sym].map! { |r| r.gsub(base::ROLES_MARKER,'') }
-        end
-
-        private :add_role_markers, :strip_role_markers
-        before_save :add_role_markers
-        after_save :strip_role_markers
-        after_rollback :strip_role_markers
-        after_find :strip_role_markers
-      end
-
     end
   end
 end
